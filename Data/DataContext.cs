@@ -2,7 +2,7 @@ using DataDriven.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
-namespace DataDriven.DataContext
+namespace DataDriven.Data
 {
     public class DataContext : DbContext
     {

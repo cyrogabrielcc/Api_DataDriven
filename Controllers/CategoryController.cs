@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataDriven.Data;
 using DataDriven.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,9 +28,18 @@ namespace DataDriven.Controllers
         //---------------POST---------------
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult<List<Category>>> Post([FromBody]Category model)
+        public async Task<ActionResult<List<Category>>> Post(
+                [FromBody]Category model,
+                [FromServices] DataContext context
+                )
         {
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+
+            context.Categories.Add(model);
+            await context.SaveChangesAsync();
             return Ok(model);
+
+            
         }
 
         //---------------PUT---------------
