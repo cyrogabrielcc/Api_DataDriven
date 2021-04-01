@@ -13,27 +13,37 @@ namespace DataDriven.Controllers
     [Route("categories")]
     public class CategoryController : ControllerBase
     {
-        //---------------GET---------------
+        //===============================GET===============================
         [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<Category>> GetById(int id)
+        [Route("")]
+        public async Task<ActionResult<List<Category>>> GetById(
+            [FromServices] DataContext context
+            )
         {
-            return new Category();
-        }
+            var categories = await context.Categories.AsNoTracking().ToListAsync();
 
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<List<Category>>> GetById()
-        {
-            return new List<Category>();
+          return categories;
+            
         }
-        //---------------POST---------------
+        
+        
+        //==========================GETBYID==============================
+      
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<ActionResult<Category>> GetById(
+            [FromServices] DataContext context, 
+            int id)
+        {
+            var category = await context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return category;
+        }
+        //===============================POST===============================
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<List<Category>>> Post(
-                [FromBody]Category model,
-                [FromServices] DataContext context
-                )
+            [FromBody]Category model,
+            [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -43,16 +53,13 @@ namespace DataDriven.Controllers
                 await context.SaveChangesAsync();
                 return Ok(model);
             }
-
             catch
             {
                 return BadRequest(new {message = "Não foi possível criar a categoria"});
-            }
-
-            
+            }     
         }
 
-        //---------------PUT---------------
+        //===============================PUT===============================
         [HttpPut]
         [Route("{id:int}")]
         public async Task<ActionResult<List<Category>>> Put(int id, 
@@ -84,11 +91,19 @@ namespace DataDriven.Controllers
             
         }
 
-        //---------------DELETE---------------
+        //==========================DELETE===============================
         [HttpDelete]
         [Route("{id:int}")]
-        public async Task<ActionResult<List<Category>>> Delete()
+        public async Task<ActionResult<List<Category>>> Delete(
+            int id,
+            [FromServices] DataContext context)
         {
+            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (category==null) return NotFound(new{message="Category not found"});
+
+
+
             return Ok();
         }
     }
