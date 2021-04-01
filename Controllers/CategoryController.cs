@@ -13,37 +13,31 @@ namespace DataDriven.Controllers
     [Route("categories")]
     public class CategoryController : ControllerBase
     {
-        //===============================GET===============================
+//====================================================GET====================================================
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<List<Category>>> GetById(
-            [FromServices] DataContext context
-            )
+        public async Task<ActionResult<List<Category>>> GetById([FromServices] DataContext context)
         {
             var categories = await context.Categories.AsNoTracking().ToListAsync();
-
-          return categories;
-            
+            return categories;
         }
         
         
-        //==========================GETBYID==============================
-      
+//===============================================GETBYID====================================================
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<ActionResult<Category>> GetById(
-            [FromServices] DataContext context, 
-            int id)
+        public async Task<ActionResult<Category>> GetById([FromServices] DataContext context, int id)
         {
             var category = await context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             return category;
         }
-        //===============================POST===============================
+        
+        
+        
+//===================================================POST==================================================
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult<List<Category>>> Post(
-            [FromBody]Category model,
-            [FromServices] DataContext context)
+        public async Task<ActionResult<List<Category>>> Post([FromBody] Category model, [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -59,51 +53,39 @@ namespace DataDriven.Controllers
             }     
         }
 
-        //===============================PUT===============================
+        
+        
+//============================================PUT====================================================
         [HttpPut]
         [Route("{id:int}")]
-        public async Task<ActionResult<List<Category>>> Put(int id, 
-        [FromBody]Category model, 
-        [FromServices] DataContext context)
+        public async Task<ActionResult<List<Category>>> Put(int id, [FromBody]Category model, [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
             //se o id informado é o msm do modelo
             if(model.Id == id) return NotFound(new {message = "Categoria não encontrada"});;
 
-             try
+            try
             {
                 // busca entrada modificada
                 context.Entry<Category>(model).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 return Ok(model);
-            }
-
-            catch(DbUpdateConcurrencyException)
-            {
+            } 
+            catch(DbUpdateConcurrencyException) {
+                return BadRequest(new {message = "Não foi possível moditicar a categoria"});
+            } 
+            catch (Exception) {
                 return BadRequest(new {message = "Não foi possível moditicar a categoria"});
             }
-
-            catch (Exception)
-            {
-                return BadRequest(new {message = "Não foi possível moditicar a categoria"});
-            }
-
-            
         }
 
-        //==========================DELETE===============================
+//==============================DELETE==================================
         [HttpDelete]
         [Route("{id:int}")]
-        public async Task<ActionResult<List<Category>>> Delete(
-            int id,
-            [FromServices] DataContext context)
+        public async Task<ActionResult<List<Category>>> Delete(int id,[FromServices] DataContext context)
         {
             var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-
             if (category==null) return NotFound(new{message="Category not found"});
-
-
-
             return Ok();
         }
     }
