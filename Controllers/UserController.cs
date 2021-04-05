@@ -14,6 +14,21 @@ namespace DataDriven.Controllers
     [Route("v1/users")]
     public class UserController : Controller
     {
+
+        [HttpGet]
+        [Route("")]
+        // [Authorize(Roles="manager")]
+        public async Task<ActionResult<List<User>>> Get([FromServices] DataContext context)
+        {
+            var users = await context
+                .Users
+                .AsNoTracking()
+                .ToListAsync();
+            
+            return users;
+        }
+
+
         //===============================POST - Criando user============================================
        [HttpPost]
        [Route("")]
@@ -59,26 +74,32 @@ namespace DataDriven.Controllers
                 token = token
             };       
        }
+        //===============================PUT============================================
+        [HttpPut]
+        [Route("{id:int}")]
+        [Authorize(Roles = "manager")]
 
-        //===============================GET-Anonimo============================================
-        [HttpGet]
-        [Route("anonimo")]
-        [AllowAnonymous]
-        public string Anonimo() => "Anonimo";
+        public async Task<ActionResult<User>> Put([FromServices] DataContext context, int id,[FromBody] User model)
+        {
+            //ver se os dados são válidos
+            if(!ModelState.IsValid) return BadRequest(ModelState);
 
-        [HttpGet]
-        [Route("autenticado")]
-        [AllowAnonymous]
-        public string Autenticado() => "Autenticado";
-        
-        [HttpGet]
-        [Route("funcionario")]
-        [Authorize(Roles="employee")]
-        public string Funcionario() => "funcionario";
+            //caso o Id exista
+            if(id != model.Id) return NotFound(new { message = "Usuário não encontrado"});
 
-        [HttpGet]
-        [Route("gerente")]
-        [Authorize(Roles="manager")]
-        public string Gerente() => "Gerente";
+            try 
+            {
+                context.Entry(model).State = EntityState.Modified; 
+                await context.SaveChangesAsync();
+                return model;  
+            }
+
+            catch
+            {
+               return BadRequest(new {message = " não foi possível criar o modelo "});
+            }
+
+
+        }
     }
 }

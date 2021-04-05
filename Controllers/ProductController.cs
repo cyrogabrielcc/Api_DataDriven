@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataDriven.Data;
 using DataDriven.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ namespace DataDriven.Controllers
 //=============================================================GET=========================================================================//
        [HttpGet]
        [Route("")]
+       [AllowAnonymous]
         public async Task<ActionResult<List<Product>>> Get([FromServices] DataContext context)
         {
             // var products = produtos + categoria-> Include, está incluindo a categoria
@@ -32,6 +34,7 @@ namespace DataDriven.Controllers
 //============================================================GetById=====================================================================//
        [HttpGet]
        [Route("categories/{id:int}")]
+       [AllowAnonymous]
         public async Task<ActionResult<List<Product>>> GetById([FromServices] DataContext context, int id)
         {
             // seleciona o ID do produto 
@@ -49,6 +52,8 @@ namespace DataDriven.Controllers
 //============================================================POST=====================================================================//
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = "employee")]
+
         public async Task<ActionResult<List<Product>>> Post([FromBody] Product model, [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);

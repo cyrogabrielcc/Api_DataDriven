@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataDriven.Data;
 using DataDriven.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +11,14 @@ using Microsoft.EntityFrameworkCore;
   
 namespace DataDriven.Controllers
 {
-    [Route("categories")]
+    [Route("v1/categories")]
     public class CategoryController : ControllerBase
     {
 //=================================================GET=======================================================
-        [HttpGet]
-        [Route("")]
+       [HttpGet]
+       [Route("")]
+       [AllowAnonymous]
+       [ResponseCache(VaryByHeader = "User-Agent", Location = ResponseCacheLocation.Any, Duration = 30)]
         public async Task<ActionResult<List<Category>>> GetById([FromServices] DataContext context)
         {
             var categories = await context.Categories.AsNoTracking().ToListAsync();
@@ -24,8 +27,10 @@ namespace DataDriven.Controllers
         
         
 //===============================================GETBYID=====================================================
-        [HttpGet]
-        [Route("{id:int}")]
+       [HttpGet]
+       [Route("{id:int}")]
+       [AllowAnonymous]
+
         public async Task<ActionResult<Category>> GetById([FromServices] DataContext context, int id)
         {
             var category = await context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
@@ -37,6 +42,7 @@ namespace DataDriven.Controllers
 //================================================POST=======================================================
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<List<Category>>> Post([FromBody] Category model, [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
@@ -58,6 +64,7 @@ namespace DataDriven.Controllers
 //================================================PUT========================================================
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<List<Category>>> Put(int id, [FromBody]Category model, [FromServices] DataContext context)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
@@ -82,6 +89,7 @@ namespace DataDriven.Controllers
 //==============================================DELETE=======================================================
         [HttpDelete]
         [Route("{id:int}")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<List<Category>>> Delete(int id,[FromServices] DataContext context)
         {
             var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
