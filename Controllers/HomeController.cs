@@ -7,9 +7,7 @@ using DataDriven.Models;
 
 namespace DataDriven.Controllers
 {
-    public class HomeController
-    {
-          [Route("v1")]
+    [Route("v1")]
     public class HomeController : Controller
     {
         [HttpGet]
@@ -31,6 +29,5 @@ namespace DataDriven.Controllers
                 message = "Dados configurados"
             });
         }
-    }
     }
 }

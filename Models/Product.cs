@@ -11,10 +11,10 @@ namespace DataDriven.Models
         [Required(ErrorMessage = "O campo é obrigatório")]
         [MaxLength(60, ErrorMessage = "Máximo de 60 caracteres")]
         [MinLength(3, ErrorMessage = "Mínimo de 3 caracteres")]
-        public int Title { get; set; }        
+        public string Title { get; set; }        
 
         [MaxLength(1024, ErrorMessage = "Máximo de 1024 caracteres")]
-        public int Description { get; set; }
+        public string Description { get; set; }
 
         //Obrigatório, sendo sempre > 1
         [Required(ErrorMessage = "O campo é obrigatório")]
