@@ -40,8 +40,11 @@ namespace DataDriven.Controllers
            
            try 
            {
+               model.Role = "employee";
                context.Users.Add(model);
                await context.SaveChangesAsync();
+
+               model.Password = "";
                return model;
            } 
            
@@ -53,53 +56,58 @@ namespace DataDriven.Controllers
 
         //===============================POST - Login============================================
 
-       [HttpPost]
-       [Route("login")]
-       [AllowAnonymous]
-
-       public async Task<ActionResult<dynamic>> Authenticate([FromServices] DataContext context, [FromBody] User model)
-       {
-           var user = await context.Users
+        [HttpPost]
+        [Route("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<dynamic>> Authenticate(
+                    [FromServices] DataContext context,
+                    [FromBody]User model)
+        {
+            var user = await context.Users
                 .AsNoTracking()
                 .Where(x => x.Username == model.Username && x.Password == model.Password)
                 .FirstOrDefaultAsync();
-            
-            //se os usuários foram encontrados no banco
-            if(user == null) return NotFound(new { message = "Usuário ou senha inválidos"});
-        
-            var token = TokenService.GenerateToken(user);
 
-            return new{
+            if (user == null)
+                return NotFound(new { message = "Usuário ou senha inválidos" });
+
+            var token = TokenService.GenerateToken(user);
+            // Esconde a senha
+            user.Password = "";
+            return new
+            {
                 user = user,
                 token = token
-            };       
-       }
+            };
+        }
         //===============================PUT============================================
-        [HttpPut]
+         [HttpPut]
         [Route("{id:int}")]
         [Authorize(Roles = "manager")]
-
-        public async Task<ActionResult<User>> Put([FromServices] DataContext context, int id,[FromBody] User model)
+        public async Task<ActionResult<User>> Put(
+            [FromServices] DataContext context,
+            int id,
+            [FromBody]User model)
         {
-            //ver se os dados são válidos
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+            // Verifica se os dados são válidos
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            //caso o Id exista
-            if(id != model.Id) return NotFound(new { message = "Usuário não encontrado"});
+            // Verifica se o ID informado é o mesmo do modelo
+            if (id != model.Id)
+                return NotFound(new { message = "Usuário não encontrada" });
 
-            try 
+            try
             {
-                context.Entry(model).State = EntityState.Modified; 
+                context.Entry(model).State = EntityState.Modified;
                 await context.SaveChangesAsync();
-                return model;  
+                return model;
             }
-
-            catch
+            catch (Exception)
             {
-               return BadRequest(new {message = " não foi possível criar o modelo "});
+                return BadRequest(new { message = "Não foi possível criar o usuário" });
+
             }
-
-
         }
     }
 }
